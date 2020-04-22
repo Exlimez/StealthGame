@@ -3,10 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/StaticMeshComponent.h"
-#include "Components/SphereComponent.h"
+//#include "Components/StaticMeshComponent.h"
+//#include "Components/SphereComponent.h"
 #include "GameFramework/Actor.h"
 #include "FPSObjectiveActor.generated.h"
+
+class UStaticMeshComponent;
+class USphereComponent;
+class UParticleSystem;
+
 
 UCLASS()
 class FPSGAME_API AFPSObjectiveActor : public AActor
@@ -34,9 +39,6 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 
 };
