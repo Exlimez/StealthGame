@@ -18,14 +18,15 @@ public:
 	AFPSAIGuard();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UPawnSensingComponent* PawnSensingComp;
 
+	UFUNCTION()
+	void OnPawnSeen(APawn* SeenPawn);
+
+	UFUNCTION()
+	void OnNoiseHeard(APawn* NoiseInstigator, const FVector& Location, float Volume);
+
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 };
