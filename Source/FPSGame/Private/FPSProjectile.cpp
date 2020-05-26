@@ -46,6 +46,7 @@ void AFPSProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPr
 
 	if(Role == ROLE_Authority)
 	{
+		MakeNoise(1.0f, Instigator);
 		Destroy();
 	}
 }
