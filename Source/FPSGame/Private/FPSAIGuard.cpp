@@ -5,6 +5,7 @@
 
 #include "Perception/PawnSensingComponent.h"
 #include "DrawDebugHelpers.h"
+#include <FPSGame\Public\FPSGameMode.h>
 
 
 // Sets default values
@@ -16,6 +17,9 @@ AFPSAIGuard::AFPSAIGuard()
 	PawnSensingComp = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensingComp"));
 	PawnSensingComp->OnSeePawn.AddDynamic(this, &AFPSAIGuard::OnPawnSeen);
 	PawnSensingComp->OnHearNoise.AddDynamic(this, &AFPSAIGuard::OnNoiseHeard);
+	
+	GuardState = EAIState::Idle;
+
 	OriginalRotation = GetActorRotation();
 }
 
@@ -26,12 +30,24 @@ void AFPSAIGuard::OnPawnSeen(APawn* SeenPawn)
 		return;
 	}
 	
+	AFPSGameMode* GM = Cast<AFPSGameMode>(GetWorld()->GetAuthGameMode());
+	if (GM)
+	{
+		GM->CompleteMission(SeenPawn, false);
+	}
 	DrawDebugSphere(GetWorld(), SeenPawn->GetActorLocation(), 32.0f,
 		12, FColor::Red, false, 10.0f);
+
+	SetGuardState(EAIState::Alerted);
 }
 
 void AFPSAIGuard::OnNoiseHeard(APawn* NoiseInstigator, const FVector& Location, float Volume)
 {
+	if (GuardState == EAIState::Alerted)
+	{
+		return;
+	}
+
 	FVector Direction = Location - GetActorLocation();
 	Direction.Normalize();
 
@@ -48,10 +64,33 @@ void AFPSAIGuard::OnNoiseHeard(APawn* NoiseInstigator, const FVector& Location, 
 
 	DrawDebugSphere(GetWorld(), Location, 32.0f,
 		12, FColor::Green, false, 10.0f);
+
+	
+	SetGuardState(EAIState::Suspecting);
+	
 }
 
 void AFPSAIGuard::ResetOrientation()
 {
+	if (GuardState == EAIState::Alerted)
+	{
+		return;
+	}
+
 	SetActorRotation(OriginalRotation);
+
+	SetGuardState(EAIState::Idle);
+}
+
+void AFPSAIGuard::SetGuardState(EAIState NewState)
+{
+	if (GuardState == NewState)
+	{
+		return;
+	}
+
+	GuardState = NewState;
+
+	OnStateChanged(GuardState);
 }
 
