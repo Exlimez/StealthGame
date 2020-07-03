@@ -5,7 +5,8 @@
 #include "FPSCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
-#include <FPSGame\Public\FPSGameState.h>
+#include "FPSGameState.h"
+#include <Runtime\Engine\Classes\Engine\World.h>
 
 AFPSGameMode::AFPSGameMode()
 {
@@ -37,10 +38,14 @@ void AFPSGameMode::CompleteMission(APawn* InstigatorPawn, bool IsMissionComplete
 			{
 				NewViewTarget = ReturnedActors[0];
 
-				APlayerController* PC = Cast<APlayerController>(InstigatorPawn->GetController());
-				if (PC)
+				for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
 				{
-					PC->SetViewTargetWithBlend(NewViewTarget, 0.5, EViewTargetBlendFunction::VTBlend_Cubic);
+					APlayerController* PC = It->Get();
+
+					if (PC)
+					{
+						PC->SetViewTargetWithBlend(NewViewTarget, 0.5, EViewTargetBlendFunction::VTBlend_Cubic);
+					}
 				}
 			}
 		}
@@ -53,7 +58,7 @@ void AFPSGameMode::CompleteMission(APawn* InstigatorPawn, bool IsMissionComplete
 	AFPSGameState* GS = GetGameState<AFPSGameState>();
 	if (GS)
 	{
-		GS->MulticastOnMissionCompleted();
+		GS->MulticastOnMissionCompleted(InstigatorPawn, IsMissionCompleted);
 	}
 
 	OnMissionCompleted(InstigatorPawn, IsMissionCompleted);
